@@ -154,7 +154,7 @@ Response:
 class QueryGenerator:
     def __init__(self):
         self.bedrock = BedrockClient(BedrockConfig())
-        self.model_id = "anthropic.claude-3-5-sonnet-20240620-v1:0"
+        self.model_id = "anthropic.claude-sonnet-4-5-20250929-v1:0"
         
     def _prepare_schema(self) -> str:
         """Prepare schema with available values for classification fields."""

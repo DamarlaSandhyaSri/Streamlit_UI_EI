@@ -9,7 +9,7 @@ logger = get_logger(__name__)
 class BedrockConfig(BaseModel):
     ENDPOINT_URL : str = "https://bedrock-runtime.us-east-1.amazonaws.com"
     AWS_REGION: str = "us-east-1"
-    PROFILE_NAME: Optional[str] = "Comm-Prop-Sandbox"
+    # PROFILE_NAME: Optional[str] = "Comm-Prop-Sandbox"
 
 class BedrockClient:
     def __init__(self, config: BedrockConfig):
