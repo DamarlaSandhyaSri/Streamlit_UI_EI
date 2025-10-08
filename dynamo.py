@@ -57,7 +57,8 @@ class DynamoDBClient:
 
     def _get_frozen_credentials(self):
         """Create AWS session and freeze credentials."""
-        session = boto3.Session(profile_name=self.profile_name)
+        # session = boto3.Session(profile_name=self.profile_name)
+        session = boto3.Session()
         credentials = session.get_credentials()
         return credentials.get_frozen_credentials()
 
