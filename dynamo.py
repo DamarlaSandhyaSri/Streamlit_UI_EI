@@ -45,7 +45,7 @@ class DynamoDBClient:
         self.config = Config(read_timeout=1000)
         
         try:
-            self.credentials = self._get_frozen_credentials()
+            # self.credentials = self._get_frozen_credentials()
             self.client = self.get_client()
             # Initialize both client and resource for different operations
             self.resource = self._get_resource()
@@ -60,7 +60,7 @@ class DynamoDBClient:
         # session = boto3.Session(profile_name=self.profile_name)
         session = boto3.Session()
         credentials = session.get_credentials()
-        return credentials.get_frozen_credentials()
+        # return credentials.get_frozen_credentials()
 
     def get_client(self):
         """Create and return a configured boto3 DynamoDB client."""
@@ -68,9 +68,9 @@ class DynamoDBClient:
             DYNAMODB_SERVICE,
             region_name=self.region,
             config=self.config,
-            aws_access_key_id=self.credentials.access_key,
-            aws_secret_access_key=self.credentials.secret_key,
-            aws_session_token=self.credentials.token,
+            # aws_access_key_id=self.credentials.access_key,
+            # aws_secret_access_key=self.credentials.secret_key,
+            # aws_session_token=self.credentials.token,
         )
 
     def _get_resource(self):
@@ -79,9 +79,9 @@ class DynamoDBClient:
             DYNAMODB_SERVICE,
             region_name=self.region,
             config=self.config,
-            aws_access_key_id=self.credentials.access_key,
-            aws_secret_access_key=self.credentials.secret_key,
-            aws_session_token=self.credentials.token,
+            # aws_access_key_id=self.credentials.access_key,
+            # aws_secret_access_key=self.credentials.secret_key,
+            # aws_session_token=self.credentials.token,
         )
 
     def upsert_item(self, item: Dict) -> bool:
