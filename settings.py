@@ -7,7 +7,9 @@ AWS_REGION = "us-east-1"
 DYNAMO_TABLE = "CrawledData"   
 
 # Bedrock Configuration
-BEDROCK_MODEL = "anthropic.claude-3-5-sonnet-20240620-v1:0"
+# BEDROCK_MODEL = "anthropic.claude-3-5-sonnet-20240620-v1:0"
+BEDROCK_MODEL = "anthropic.claude-sonnet-4-5-20250929-v1:0"
+
 
 # Processing Configuration
 DEFAULT_BATCH_SIZE = 5
