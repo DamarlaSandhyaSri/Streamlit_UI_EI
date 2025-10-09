@@ -8,7 +8,8 @@ DYNAMO_TABLE = "CrawledData"
 
 # Bedrock Configuration
 # BEDROCK_MODEL = "anthropic.claude-3-5-sonnet-20240620-v1:0"
-BEDROCK_MODEL = "anthropic.claude-sonnet-4-5-20250929-v1:0"
+# BEDROCK_MODEL = "anthropic.claude-sonnet-4-5-20250929-v1:0"
+BEDROCK_MODEL = "arn:aws:bedrock:us-east-1:982135724133:inference-profile/global.anthropic.claude-sonnet-4-5-20250929-v1:0"
 
 
 # Processing Configuration

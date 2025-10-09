@@ -3,6 +3,7 @@ import re
 from bedrock_client import BedrockClient, BedrockConfig
 from logger import get_logger
 from concern_risk_misc_naics import concerns_events, emerging_risks, misc_topics, naics_data
+from settings import BEDROCK_MODEL
 
 logger = get_logger(__name__)
 
@@ -154,7 +155,7 @@ Response:
 class QueryGenerator:
     def __init__(self):
         self.bedrock = BedrockClient(BedrockConfig())
-        self.model_id = "anthropic.claude-sonnet-4-5-20250929-v1:0"
+        self.model_id = BEDROCK_MODEL
         
     def _prepare_schema(self) -> str:
         """Prepare schema with available values for classification fields."""
