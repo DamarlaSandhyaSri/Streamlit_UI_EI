@@ -7,7 +7,8 @@
 APP_DIR="/home/ec2-user/Streamlit_UI_EI"
 VENV_DIR="$APP_DIR/venv"
 APP_FILE="app.py"
-DOMAIN="10.94.74.222"
+# DOMAIN="10.94.74.222"
+DOMAIN="emerging-insights.com"
 STREAMLIT_PORT=8501
 USER="ec2-user"
 
