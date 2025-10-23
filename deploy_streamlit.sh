@@ -1,22 +1,20 @@
 #!/bin/bash
-# -------------------------------
-# Streamlit + Nginx + SSL Deploy
-# -------------------------------
+# ----------------------------------------
+# Streamlit + Nginx + Self-Signed SSL Deploy
+# ----------------------------------------
 
-# Variables
 APP_DIR="/home/ec2-user/Streamlit_UI_EI"
 VENV_DIR="$APP_DIR/venv"
 APP_FILE="app.py"
-# DOMAIN="10.94.74.222"
-DOMAIN="emerging-insights.com"
+DOMAIN="10.94.74.222"    # EC2 private or public IP
 STREAMLIT_PORT=8501
 USER="ec2-user"
 
-# 1️⃣ Update & install dependencies
+# 1️⃣ Update and install dependencies
 dnf update -y
-dnf install -y python3-pip python3-venv nginx certbot python3-certbot-nginx git
+dnf install -y python3-pip python3-venv nginx openssl git
 
-# 2️⃣ Setup virtual environment
+# 2️⃣ Setup Python virtual environment
 if [ ! -d "$VENV_DIR" ]; then
     python3 -m venv "$VENV_DIR"
 fi
@@ -25,20 +23,36 @@ source "$VENV_DIR/bin/activate"
 pip install --upgrade pip
 pip install streamlit
 
-# Install extra requirements if requirements.txt exists
+# Install extra requirements if present
 if [ -f "$APP_DIR/requirements.txt" ]; then
     pip install -r "$APP_DIR/requirements.txt"
 fi
-
 deactivate
 
-# 3️⃣ Configure Nginx
+# 3️⃣ Generate a self-signed SSL certificate (valid 1 year)
+SSL_DIR="/etc/nginx/ssl"
+mkdir -p $SSL_DIR
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+  -keyout $SSL_DIR/selfsigned.key \
+  -out $SSL_DIR/selfsigned.crt \
+  -subj "/CN=$DOMAIN"
+
+# 4️⃣ Configure Nginx for HTTPS reverse proxy
 NGINX_CONF="/etc/nginx/conf.d/streamlit.conf"
 
 cat > "$NGINX_CONF" <<EOL
 server {
     listen 80;
     server_name $DOMAIN;
+    return 301 https://\$host\$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    server_name $DOMAIN;
+
+    ssl_certificate $SSL_DIR/selfsigned.crt;
+    ssl_certificate_key $SSL_DIR/selfsigned.key;
 
     location / {
         proxy_pass http://127.0.0.1:$STREAMLIT_PORT;
@@ -51,13 +65,6 @@ server {
 EOL
 
 nginx -t && systemctl restart nginx
-
-# 4️⃣ Install SSL via Certbot (Skip if IP)
-if [[ "$DOMAIN" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-    echo "⚠️ Skipping SSL setup — Certbot cannot issue certificates for IP addresses."
-else
-    certbot --nginx -d $DOMAIN --non-interactive --agree-tos -m admin@$DOMAIN --redirect
-fi
 
 # 5️⃣ Setup Streamlit as a systemd service
 SERVICE_FILE="/etc/systemd/system/streamlit.service"
@@ -83,11 +90,109 @@ systemctl restart streamlit
 
 # 6️⃣ Finish
 echo "✅ Deployment completed!"
-if [[ "$DOMAIN" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-    echo "Visit: http://$DOMAIN"
-else
-    echo "Visit: https://$DOMAIN"
-fi
+echo "Visit: https://$DOMAIN (you may need to bypass browser warning)"
+
+
+
+
+
+
+
+
+
+
+
+
+# #!/bin/bash
+# # -------------------------------
+# # Streamlit + Nginx + SSL Deploy
+# # -------------------------------
+
+# # Variables
+# APP_DIR="/home/ec2-user/Streamlit_UI_EI"
+# VENV_DIR="$APP_DIR/venv"
+# APP_FILE="app.py"
+# # DOMAIN="10.94.74.222"
+# DOMAIN="emerging-insights.com"
+# STREAMLIT_PORT=8501
+# USER="ec2-user"
+
+# # 1️⃣ Update & install dependencies
+# dnf update -y
+# dnf install -y python3-pip python3-venv nginx certbot python3-certbot-nginx git
+
+# # 2️⃣ Setup virtual environment
+# if [ ! -d "$VENV_DIR" ]; then
+#     python3 -m venv "$VENV_DIR"
+# fi
+
+# source "$VENV_DIR/bin/activate"
+# pip install --upgrade pip
+# pip install streamlit
+
+# # Install extra requirements if requirements.txt exists
+# if [ -f "$APP_DIR/requirements.txt" ]; then
+#     pip install -r "$APP_DIR/requirements.txt"
+# fi
+
+# deactivate
+
+# # 3️⃣ Configure Nginx
+# NGINX_CONF="/etc/nginx/conf.d/streamlit.conf"
+
+# cat > "$NGINX_CONF" <<EOL
+# server {
+#     listen 80;
+#     server_name $DOMAIN;
+
+#     location / {
+#         proxy_pass http://127.0.0.1:$STREAMLIT_PORT;
+#         proxy_set_header Host \$host;
+#         proxy_set_header X-Real-IP \$remote_addr;
+#         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+#         proxy_set_header X-Forwarded-Proto \$scheme;
+#     }
+# }
+# EOL
+
+# nginx -t && systemctl restart nginx
+
+# # 4️⃣ Install SSL via Certbot (Skip if IP)
+# if [[ "$DOMAIN" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+#     echo "⚠️ Skipping SSL setup — Certbot cannot issue certificates for IP addresses."
+# else
+#     certbot --nginx -d $DOMAIN --non-interactive --agree-tos -m admin@$DOMAIN --redirect
+# fi
+
+# # 5️⃣ Setup Streamlit as a systemd service
+# SERVICE_FILE="/etc/systemd/system/streamlit.service"
+
+# cat > "$SERVICE_FILE" <<EOL
+# [Unit]
+# Description=Streamlit App
+# After=network.target
+
+# [Service]
+# User=$USER
+# WorkingDirectory=$APP_DIR
+# ExecStart=$VENV_DIR/bin/streamlit run $APP_FILE --server.port $STREAMLIT_PORT --server.address 0.0.0.0
+# Restart=always
+
+# [Install]
+# WantedBy=multi-user.target
+# EOL
+
+# systemctl daemon-reload
+# systemctl enable streamlit
+# systemctl restart streamlit
+
+# # 6️⃣ Finish
+# echo "✅ Deployment completed!"
+# if [[ "$DOMAIN" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+#     echo "Visit: http://$DOMAIN"
+# else
+#     echo "Visit: https://$DOMAIN"
+# fi
 
 
 
