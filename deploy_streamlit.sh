@@ -14,9 +14,13 @@ sudo apt install -y python3-pip python3-venv nginx certbot python3-certbot-nginx
 # 2️⃣ Setup virtual environment if [ ! -d "$VENV_DIR" ]; then    python3 -m venv "$VENV_DIR"fisource "$VENV_DIR/bin/activate"
 pip install --upgrade pip
 pip install streamlit
-# Install extra requirements if requirements.txt exists if [ -f "$APP_DIR/requirements.txt" ]; then    pip install -r "$APP_DIR/requirements.txt"fi
+# Install extra requirements 
+if requirements.txt exists if [ -f "$APP_DIR/requirements.txt" ]; then    
+    pip install -r "$APP_DIR/requirements.txt"
+fi
 deactivate
-# 3️⃣ Configure NginxNGINX_CONF="/etc/nginx/sites-available/streamlit.conf"
+# 3️⃣ Configure Nginx
+NGINX_CONF="/etc/nginx/sites-available/streamlit.conf"
 sudo tee $NGINX_CONF > /dev/null <<EOL
 server {
     listen 80;
@@ -34,8 +38,10 @@ EOL
 sudo ln -sf $NGINX_CONF /etc/nginx/sites-enabled/
 sudo nginx -t
 sudo systemctl restart nginx
-# 4️⃣ Install SSL via Certbotsudo certbot --nginx -d $DOMAIN --non-interactive --agree-tos -m admin@$DOMAIN --redirect
-# 5️⃣ Setup Streamlit as systemd serviceSERVICE_FILE="/etc/systemd/system/streamlit.service"
+# 4️⃣ Install SSL via Certbot
+sudo certbot --nginx -d $DOMAIN --non-interactive --agree-tos -m admin@$DOMAIN --redirect
+# 5️⃣ Setup Streamlit as systemd service
+SERVICE_FILE="/etc/systemd/system/streamlit.service"
 sudo tee $SERVICE_FILE > /dev/null <<EOL
 [Unit]
 Description=Streamlit App
@@ -53,4 +59,6 @@ EOL
 sudo systemctl daemon-reload
 sudo systemctl enable streamlit
 sudo systemctl start streamlit
-# 6️⃣ Finish echo "✅ Deployment completed!" echo "Visit: https://$DOMAIN"
+# 6️⃣ Finish 
+echo "✅ Deployment completed!" 
+echo "Visit: https://$DOMAIN"
