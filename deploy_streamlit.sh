@@ -12,8 +12,8 @@ STREAMLIT_PORT=8501
 USER="ec2-user"
 
 # 1️⃣ Update & install dependencies
-yum update -y
-yum install -y python3-pip python3-venv nginx certbot python3-certbot-nginx git
+dnf update -y
+dnf install -y python3-pip python3-venv nginx certbot python3-certbot-nginx git
 
 # 2️⃣ Setup virtual environment
 if [ ! -d "$VENV_DIR" ]; then
