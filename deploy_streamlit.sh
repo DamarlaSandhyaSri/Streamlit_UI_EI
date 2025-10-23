@@ -12,8 +12,8 @@ STREAMLIT_PORT=8501
 USER="ubuntu"
  
 # 1️⃣ Update & install dependencies
-sudo apt update
-sudo apt install -y python3-pip python3-venv nginx certbot python3-certbot-nginx git
+yum update
+yum install -y python3-pip python3-venv nginx certbot python3-certbot-nginx git
  
 # 2️⃣ Setup virtual environment
 if [ ! -d "$VENV_DIR" ]; then
@@ -34,7 +34,7 @@ deactivate
 # 3️⃣ Configure Nginx
 NGINX_CONF="/etc/nginx/sites-available/streamlit.conf"
  
-sudo tee $NGINX_CONF > /dev/null <<EOL
+yum tee $NGINX_CONF > /dev/null <<EOL
 server {
     listen 80;
     server_name $DOMAIN;
@@ -49,17 +49,17 @@ server {
 }
 EOL
  
-sudo ln -sf $NGINX_CONF /etc/nginx/sites-enabled/
-sudo nginx -t
-sudo systemctl restart nginx
+yum ln -sf $NGINX_CONF /etc/nginx/sites-enabled/
+yum nginx -t
+yum systemctl restart nginx
  
 # 4️⃣ Install SSL via Certbot
-sudo certbot --nginx -d $DOMAIN --non-interactive --agree-tos -m admin@$DOMAIN --redirect
+yum certbot --nginx -d $DOMAIN --non-interactive --agree-tos -m admin@$DOMAIN --redirect
  
 # 5️⃣ Setup Streamlit as systemd service
 SERVICE_FILE="/etc/systemd/system/streamlit.service"
  
-sudo tee $SERVICE_FILE > /dev/null <<EOL
+yum tee $SERVICE_FILE > /dev/null <<EOL
 [Unit]
 Description=Streamlit App
 After=network.target
@@ -74,9 +74,9 @@ Restart=always
 WantedBy=multi-user.target
 EOL
  
-sudo systemctl daemon-reload
-sudo systemctl enable streamlit
-sudo systemctl start streamlit
+yum systemctl daemon-reload
+yum systemctl enable streamlit
+yum systemctl start streamlit
  
 # 6️⃣ Finish
 echo "✅ Deployment completed!"
